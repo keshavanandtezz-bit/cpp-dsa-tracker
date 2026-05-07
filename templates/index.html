@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>C++ DSA Tracker — Keshav</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* =============================================
+       CSS VARIABLES — change theme from here
+    ============================================= */
+    :root {
+      --bg:          #080810;
+      --bg2:         #0f0f1a;
+      --card:        #12121f;
+      --card-hover:  #1a1a2e;
+      --border:      #1e1e35;
+      --accent:      #6c63ff;
+      --accent2:     #00d4aa;
+      --accent3:     #ff6b6b;
+      --yellow:      #ffd60a;
+      --text:        #e8e8f0;
+      --text-dim:    #6b6b8a;
+      --text-muted:  #3a3a5c;
+      --green:       #00d4aa;
+      --orange:      #ff8c42;
+      --red:         #ff6b6b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* =============================================
+       BACKGROUND GRID EFFECT
+    ============================================= */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--text-muted) 1px, transparent 1px),
+        linear-gradient(90deg, var(--text-muted) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* =============================================
+       NAVBAR
+    ============================================= */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8, 8, 16, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .nav-logo span { color: var(--accent2); }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .streak-badge {
+      background: linear-gradient(135deg, #ff6b6b, #ff8c42);
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* =============================================
+       MAIN LAYOUT
+    ============================================= */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* =============================================
+       HERO SECTION
+    ============================================= */
+    .hero {
+      text-align: center;
+      padding: 3rem 0 2rem;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: rgba(108, 99, 255, 0.15);
+      border: 1px solid rgba(108, 99, 255, 0.3);
+      color: var(--accent);
+      padding: 0.3rem 1rem;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* =============================================
+       STATS GRID
+    ============================================= */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin: 2.5rem 0;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--stat-color, var(--accent));
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+
+    .stat-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--stat-color, var(--accent));
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* =============================================
+       PROGRESS BAR
+    ============================================= */
+    .progress-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .progress-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .progress-percent {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
+    .progress-bar-bg {
+      background: var(--bg);
+      border-radius: 100px;
+      height: 12px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 100px;
+      transition: width 1s ease;
+      width: 0%;
+    }
+
+    .progress-sub {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .progress-sub-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* =============================================
+       SECTION FILTER TABS
+    ============================================= */
+    .filter-section {
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-label {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      margin-right: 0.5rem;
+    }
+
+    .filter-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* =============================================
+       TOPICS GRID
+    ============================================= */
+    .section-block {
+      margin-bottom: 3rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .section-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      background: var(--bg2);
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+    }
+
+    .section-progress-text {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .topics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.8rem;
+    }
+
+    /* =============================================
+       TOPIC CARD
+    ============================================= */
+    .topic-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: var(--card-hover);
+    }
+
+    .topic-card.status-completed {
+      border-left: 3px solid var(--green);
+    }
+
+    .topic-card.status-in_progress {
+      border-left: 3px solid var(--yellow);
+    }
+
+    .topic-card.status-not_started {
+      border-left: 3px solid var(--border);
+    }
+
+    .topic-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .video-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      background: var(--bg);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .status-pill {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .pill-completed  { background: rgba(0,212,170,0.15); color: var(--green); }
+    .pill-in_progress{ background: rgba(255,214,10,0.15); color: var(--yellow); }
+    .pill-not_started{ background: rgba(107,107,138,0.1); color: var(--text-muted); }
+
+    .topic-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text);
+      margin-bottom: 0.8rem;
+    }
+
+    .topic-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* =============================================
+       HEATMAP
+    ============================================= */
+    .heatmap-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .heatmap-section h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .heatmap-grid {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+
+    .heatmap-cell {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      transition: transform 0.1s;
+      cursor: default;
+      position: relative;
+    }
+
+    .heatmap-cell:hover { transform: scale(1.5); z-index: 10; }
+    .heatmap-cell.level-1 { background: rgba(108,99,255,0.3); border-color: rgba(108,99,255,0.4); }
+    .heatmap-cell.level-2 { background: rgba(108,99,255,0.55); border-color: rgba(108,99,255,0.6); }
+    .heatmap-cell.level-3 { background: rgba(108,99,255,0.8); border-color: rgba(108,99,255,0.9); }
+    .heatmap-cell.level-4 { background: #6c63ff; border-color: #6c63ff; }
+
+    /* =============================================
+       LOADING STATE
+    ============================================= */
+    .loading {
+      text-align: center;
+      padding: 4rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .loading-dots::after {
+      content: '...';
+      animation: dots 1.5s infinite;
+    }
+
+    @keyframes dots {
+      0%,20%  { content: '.'; }
+      40%,60% { content: '..'; }
+      80%,100%{ content: '...'; }
+    }
+
+    /* =============================================
+       RESPONSIVE
+    ============================================= */
+    @media (max-width: 768px) {
+      main { padding: 1rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .topics-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo">cpp<span>::</span>dsa_tracker</div>
+  <ul class="nav-links">
+    <li><a href="/">Dashboard</a></li>
+  </ul>
+  <div class="streak-badge">🔥 <span id="nav-streak">0</span> day streak</div>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">LOVE BABBAR · 150 VIDEOS · C++ DSA</div>
+    <h1>Your <span class="highlight">C++ DSA</span><br/>Mastery Dashboard</h1>
+    <p>Track every topic, every question, every day of your journey.</p>
+  </div>
+
+  <!-- STATS GRID -->
+  <div class="stats-grid">
+    <div class="stat-card" style="--stat-color: var(--accent2)">
+      <div class="stat-number" id="stat-completed">0</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card" style="--stat-color: var(--yellow)">
+      <div class="stat-number" id="stat-progress">0</div>
+      <div class="stat-label">In Progress</div>
+    </div>
+    <div class="stat-card" style="--stat-color: var(--text-dim)">
+      <div class="stat-number" id="stat-pending">150</div>
+      <div class="stat-label">Remaining</div>
+    </div>
+    <div class="stat-card" style="--stat-color: var(--accent)">
+      <div class="stat-number" id="stat-questions">0</div>
+      <div class="stat-label">Questions</div>
+    </div>
+    <div class="stat-card" style="--stat-color: var(--orange)">
+      <div class="stat-number" id="stat-streak">0</div>
+      <div class="stat-label">Day Streak 🔥</div>
+    </div>
+    <div class="stat-card" style="--stat-color: var(--accent3)">
+      <div class="stat-number" id="stat-advanced">0</div>
+      <div class="stat-label">Advanced Qs</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-section">
+    <div class="progress-header">
+      <h2>Overall Progress</h2>
+      <div class="progress-percent"><span id="progress-pct">0</span>%</div>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+    <div class="progress-sub">
+      <div class="progress-sub-item">
+        <div class="dot" style="background:var(--green)"></div>
+        <span id="lbl-completed">0 completed</span>
+      </div>
+      <div class="progress-sub-item">
+        <div class="dot" style="background:var(--yellow)"></div>
+        <span id="lbl-progress">0 in progress</span>
+      </div>
+      <div class="progress-sub-item">
+        <div class="dot" style="background:var(--text-muted)"></div>
+        <span id="lbl-remaining">150 remaining</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="heatmap-section">
+    <h2>📅 Consistency Heatmap</h2>
+    <div class="heatmap-grid" id="heatmap-grid">
+      <!-- Generated by JS -->
+    </div>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-section">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" onclick="filterTopics('all', this)">All</button>
+    <button class="filter-btn" onclick="filterTopics('not_started', this)">Not Started</button>
+    <button class="filter-btn" onclick="filterTopics('in_progress', this)">In Progress</button>
+    <button class="filter-btn" onclick="filterTopics('completed', this)">Completed</button>
+  </div>
+
+  <!-- TOPICS BY SECTION -->
+  <div id="topics-container">
+    <div class="loading">
+      <span class="loading-dots">Loading your topics</span>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// =============================================
+// CONCEPT: This is where all the JavaScript
+// logic lives. It runs after the page loads.
+// =============================================
+
+let allTopicsData = {}  // Store all topics globally for filtering
+
+// =============================================
+// 1. LOAD STATS — fills all the number cards
+// =============================================
+async function loadStats() {
+  try {
+    const res  = await fetch('/api/stats')
+    const json = await res.json()
+    if (!json.success) return
+
+    const d = json.data
+
+    // Update stat cards
+    document.getElementById('stat-completed').textContent  = d.completed
+    document.getElementById('stat-progress').textContent   = d.in_progress
+    document.getElementById('stat-pending').textContent    = d.not_started
+    document.getElementById('stat-questions').textContent  = d.total_questions
+    document.getElementById('stat-streak').textContent     = d.current_streak
+    document.getElementById('stat-advanced').textContent   = d.advanced
+    document.getElementById('nav-streak').textContent      = d.current_streak
+
+    // Update progress bar
+    document.getElementById('progress-pct').textContent    = d.percent_done
+    document.getElementById('progress-bar').style.width    = d.percent_done + '%'
+
+    // Update labels
+    document.getElementById('lbl-completed').textContent  = `${d.completed} completed`
+    document.getElementById('lbl-progress').textContent   = `${d.in_progress} in progress`
+    document.getElementById('lbl-remaining').textContent  = `${d.not_started} remaining`
+
+  } catch(e) {
+    console.error('Stats error:', e)
+  }
+}
+
+// =============================================
+// 2. LOAD HEATMAP — builds the activity grid
+// =============================================
+async function loadHeatmap() {
+  try {
+    const res  = await fetch('/api/logs')
+    const json = await res.json()
+    if (!json.success) return
+
+    // Build a map of date → questions solved
+    const logMap = {}
+    json.data.forEach(log => {
+      logMap[log.log_date] = log.questions_solved
+    })
+
+    // Generate last 90 days
+    const grid   = document.getElementById('heatmap-grid')
+    grid.innerHTML = ''
+    const today  = new Date()
+
+    for (let i = 89; i >= 0; i--) {
+      const d    = new Date(today)
+      d.setDate(today.getDate() - i)
+      const key  = d.toISOString().split('T')[0]
+      const val  = logMap[key] || 0
+
+      const cell = document.createElement('div')
+      cell.className = 'heatmap-cell'
+      if (val >= 5)      cell.classList.add('level-4')
+      else if (val >= 3) cell.classList.add('level-3')
+      else if (val >= 1) cell.classList.add('level-2')
+      else if (val > 0)  cell.classList.add('level-1')
+
+      cell.title = `${key}: ${val} questions`
+      grid.appendChild(cell)
+    }
+  } catch(e) {
+    console.error('Heatmap error:', e)
+  }
+}
+
+// =============================================
+// 3. LOAD TOPICS — the main playlist grid
+// =============================================
+async function loadTopics() {
+  try {
+    const res  = await fetch('/api/topics/sections')
+    const json = await res.json()
+    if (!json.success) return
+
+    allTopicsData = json.data  // Save globally for filtering
+    renderTopics(allTopicsData, 'all')
+
+  } catch(e) {
+    document.getElementById('topics-container').innerHTML =
+      '<div class="loading">Error loading topics. Is Flask running?</div>'
+  }
+}
+
+// =============================================
+// 4. RENDER TOPICS — builds the HTML cards
+// =============================================
+function renderTopics(sections, filter) {
+  const container = document.getElementById('topics-container')
+  container.innerHTML = ''
+
+  const sectionOrder = [
+    'C++ Basics','Arrays & Strings','Searching & Sorting',
+    'Pointers & Memory','OOP','Recursion','Linked Lists',
+    'Stacks','Queues','Trees & Heaps','Hashing','Graphs',
+    'Dynamic Programming','Backtracking','Tries','Greedy',
+    'Advanced & Revision'
+  ]
+
+  sectionOrder.forEach(sectionName => {
+    if (!sections[sectionName]) return
+
+    let topics = sections[sectionName]
+
+    // Apply filter
+    if (filter !== 'all') {
+      topics = topics.filter(t => t.status === filter)
+    }
+    if (topics.length === 0) return
+
+    // Section stats
+    const total     = sections[sectionName].length
+    const completed = sections[sectionName].filter(t => t.status === 'completed').length
+
+    // Build section block
+    const block = document.createElement('div')
+    block.className = 'section-block'
+    block.innerHTML = `
+      <div class="section-header">
+        <div class="section-title">${sectionName}</div>
+        <div class="section-count">${total} videos</div>
+        <div class="section-progress-text">${completed}/${total} done</div>
+      </div>
+      <div class="topics-grid" id="grid-${sectionName.replace(/\s+/g,'-')}"></div>
+    `
+    container.appendChild(block)
+
+    const grid = block.querySelector('.topics-grid')
+
+    topics.forEach(topic => {
+      const card = document.createElement('a')
+      card.href  = `/topic/${topic.id}`
+      card.className = `topic-card status-${topic.status}`
+
+      const statusLabels = {
+        'not_started': 'Not Started',
+        'in_progress':  'In Progress',
+        'completed':    'Completed'
+      }
+
+      const daysTaken = topic.days_taken ? `${topic.days_taken}d` : '—'
+
+      card.innerHTML = `
+        <div class="topic-card-top">
+          <span class="video-num">#${String(topic.video_number).padStart(3,'0')}</span>
+          <span class="status-pill pill-${topic.status}">${statusLabels[topic.status]}</span>
+        </div>
+        <div class="topic-title">${topic.title}</div>
+        <div class="topic-meta">
+          <span>⏱ ${daysTaken}</span>
+          <span>${topic.date_started ? '📅 ' + topic.date_started : 'Not started yet'}</span>
+        </div>
+      `
+      grid.appendChild(card)
+    })
+  })
+}
+
+// =============================================
+// 5. FILTER FUNCTION — called by filter buttons
+// =============================================
+function filterTopics(status, btn) {
+  // Update active button
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  // Re-render with filter
+  renderTopics(allTopicsData, status)
+}
+
+// =============================================
+// 6. INIT — run everything on page load
+// =============================================
+async function init() {
+  await loadStats()
+  await loadHeatmap()
+  await loadTopics()
+
+  // Ping daily log (register today as active)
+  fetch('/api/logs/ping', { method: 'POST' })
+}
+
+// Start when page is ready
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>

@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Topic — C++ DSA Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #080810; --bg2: #0f0f1a; --card: #12121f;
+      --card-hover: #1a1a2e; --border: #1e1e35;
+      --accent: #6c63ff; --accent2: #00d4aa; --accent3: #ff6b6b;
+      --yellow: #ffd60a; --text: #e8e8f0; --text-dim: #6b6b8a;
+      --text-muted: #3a3a5c; --green: #00d4aa; --orange: #ff8c42;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image: linear-gradient(var(--text-muted) 1px, transparent 1px),
+        linear-gradient(90deg, var(--text-muted) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.04; pointer-events:none; z-index:0;
+    }
+
+    nav {
+      position:sticky; top:0; z-index:100;
+      background:rgba(8,8,16,0.85); backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+      padding:1rem 2rem;
+      display:flex; align-items:center; gap:1rem;
+    }
+
+    .back-btn {
+      color:var(--text-dim); text-decoration:none;
+      font-size:0.9rem; transition:color 0.2s;
+      display:flex; align-items:center; gap:0.4rem;
+    }
+    .back-btn:hover { color:var(--text); }
+
+    .nav-title {
+      font-family:'JetBrains Mono', monospace;
+      font-size:0.85rem; color:var(--accent);
+    }
+
+    main {
+      position:relative; z-index:1;
+      max-width:1100px; margin:0 auto; padding:2rem;
+    }
+
+    /* TOPIC HEADER */
+    .topic-header {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:20px; padding:2rem; margin-bottom:2rem;
+    }
+
+    .topic-meta-row {
+      display:flex; gap:1rem; align-items:center;
+      flex-wrap:wrap; margin-bottom:1rem;
+    }
+
+    .video-badge {
+      font-family:'JetBrains Mono',monospace; font-size:0.8rem;
+      background:var(--bg); border:1px solid var(--border);
+      padding:0.3rem 0.8rem; border-radius:8px; color:var(--text-dim);
+    }
+
+    .section-badge {
+      font-size:0.8rem; color:var(--accent);
+      background:rgba(108,99,255,0.1);
+      border:1px solid rgba(108,99,255,0.2);
+      padding:0.3rem 0.8rem; border-radius:8px;
+    }
+
+    .topic-title-big {
+      font-size:1.6rem; font-weight:700; line-height:1.3;
+      margin-bottom:1.5rem;
+    }
+
+    /* STATUS BUTTONS */
+    .status-controls {
+      display:flex; gap:0.8rem; flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .status-btn {
+      padding:0.5rem 1.2rem; border-radius:100px;
+      border:1px solid var(--border);
+      background:var(--bg); color:var(--text-dim);
+      cursor:pointer; font-size:0.85rem;
+      font-family:'Space Grotesk',sans-serif;
+      font-weight:500; transition:all 0.2s;
+    }
+
+    .status-btn:hover { border-color:var(--accent); color:var(--text); }
+    .status-btn.active-not   { background:rgba(107,107,138,0.2); color:var(--text-dim); border-color:var(--text-muted); }
+    .status-btn.active-prog  { background:rgba(255,214,10,0.15); color:var(--yellow); border-color:var(--yellow); }
+    .status-btn.active-done  { background:rgba(0,212,170,0.15); color:var(--green); border-color:var(--green); }
+
+    .days-taken {
+      margin-left:auto;
+      font-family:'JetBrains Mono',monospace;
+      font-size:0.85rem; color:var(--text-dim);
+    }
+
+    /* TWO COLUMN LAYOUT */
+    .two-col {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:1.5rem;
+      margin-bottom:1.5rem;
+    }
+
+    @media(max-width:768px) { .two-col { grid-template-columns:1fr; } }
+
+    /* CARDS */
+    .panel {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:16px; padding:1.5rem;
+    }
+
+    .panel-header {
+      display:flex; justify-content:space-between;
+      align-items:center; margin-bottom:1.2rem;
+    }
+
+    .panel-title {
+      font-size:0.95rem; font-weight:700;
+      display:flex; align-items:center; gap:0.5rem;
+    }
+
+    .add-btn {
+      background:var(--accent); color:white;
+      border:none; padding:0.4rem 1rem;
+      border-radius:100px; cursor:pointer;
+      font-size:0.8rem; font-weight:600;
+      font-family:'Space Grotesk',sans-serif;
+      transition:opacity 0.2s;
+    }
+    .add-btn:hover { opacity:0.85; }
+    .add-btn.secondary {
+      background:transparent; border:1px solid var(--accent2);
+      color:var(--accent2);
+    }
+
+    /* QUESTION ITEM */
+    .question-item {
+      background:var(--bg); border:1px solid var(--border);
+      border-radius:12px; padding:1rem;
+      margin-bottom:0.8rem; transition:border-color 0.2s;
+    }
+    .question-item:hover { border-color:var(--accent); }
+
+    .question-item.advanced { border-left:3px solid var(--orange); }
+    .question-item.basic    { border-left:3px solid var(--accent); }
+
+    .q-top {
+      display:flex; justify-content:space-between;
+      align-items:flex-start; gap:0.5rem;
+      margin-bottom:0.8rem;
+    }
+
+    .q-text {
+      font-size:0.9rem; font-weight:600; line-height:1.4;
+      flex:1;
+    }
+
+    .q-actions { display:flex; gap:0.4rem; flex-shrink:0; }
+
+    .q-btn {
+      background:none; border:1px solid var(--border);
+      color:var(--text-dim); padding:0.2rem 0.6rem;
+      border-radius:6px; cursor:pointer; font-size:0.75rem;
+      transition:all 0.2s; font-family:'Space Grotesk',sans-serif;
+    }
+    .q-btn:hover { border-color:var(--accent); color:var(--text); }
+    .q-btn.solved { background:rgba(0,212,170,0.15); color:var(--green); border-color:var(--green); }
+    .q-btn.delete:hover { border-color:var(--accent3); color:var(--accent3); }
+
+    /* CODE BLOCK */
+    .code-block {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:8px; padding:0.8rem;
+      font-family:'JetBrains Mono',monospace;
+      font-size:0.75rem; color:var(--accent2);
+      white-space:pre-wrap; word-break:break-all;
+      max-height:150px; overflow-y:auto; margin-top:0.5rem;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position:fixed; inset:0;
+      background:rgba(0,0,0,0.7); backdrop-filter:blur(4px);
+      z-index:1000; display:none;
+      align-items:center; justify-content:center; padding:1rem;
+    }
+    .modal-overlay.open { display:flex; }
+
+    .modal {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:20px; padding:2rem;
+      width:100%; max-width:600px; max-height:90vh;
+      overflow-y:auto;
+    }
+
+    .modal h3 { margin-bottom:1.5rem; font-size:1.1rem; }
+
+    .form-group { margin-bottom:1rem; }
+    .form-group label {
+      display:block; font-size:0.8rem; color:var(--text-dim);
+      margin-bottom:0.4rem; font-weight:500;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width:100%; background:var(--bg);
+      border:1px solid var(--border); color:var(--text);
+      padding:0.7rem 1rem; border-radius:10px;
+      font-family:'Space Grotesk',sans-serif; font-size:0.9rem;
+      transition:border-color 0.2s; resize:vertical;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline:none; border-color:var(--accent);
+    }
+    .form-group textarea { min-height:120px; }
+
+    .modal-actions {
+      display:flex; gap:0.8rem; margin-top:1.5rem; justify-content:flex-end;
+    }
+
+    .cancel-btn {
+      background:none; border:1px solid var(--border);
+      color:var(--text-dim); padding:0.6rem 1.5rem;
+      border-radius:100px; cursor:pointer;
+      font-family:'Space Grotesk',sans-serif;
+    }
+    .cancel-btn:hover { border-color:var(--text-dim); }
+
+    /* NOTES */
+    .notes-textarea {
+      width:100%; background:var(--bg);
+      border:1px solid var(--border); color:var(--text);
+      padding:1rem; border-radius:10px;
+      font-family:'Space Grotesk',sans-serif; font-size:0.9rem;
+      resize:vertical; min-height:120px; transition:border-color 0.2s;
+    }
+    .notes-textarea:focus { outline:none; border-color:var(--accent); }
+    .save-notes-btn {
+      margin-top:0.8rem; background:var(--accent); color:white;
+      border:none; padding:0.5rem 1.5rem; border-radius:100px;
+      cursor:pointer; font-size:0.85rem; font-weight:600;
+      font-family:'Space Grotesk',sans-serif;
+    }
+
+    /* YOUTUBE */
+    .yt-row {
+      display:flex; gap:0.8rem; margin-bottom:1rem;
+    }
+    .yt-input {
+      flex:1; background:var(--bg); border:1px solid var(--border);
+      color:var(--text); padding:0.6rem 1rem; border-radius:10px;
+      font-family:'Space Grotesk',sans-serif; font-size:0.85rem;
+    }
+    .yt-input:focus { outline:none; border-color:var(--accent); }
+    .yt-btn {
+      background:var(--accent3); color:white; border:none;
+      padding:0.6rem 1.2rem; border-radius:10px; cursor:pointer;
+      font-size:0.85rem; font-weight:600;
+      font-family:'Space Grotesk',sans-serif;
+    }
+    .yt-frame {
+      width:100%; aspect-ratio:16/9;
+      border:none; border-radius:12px; margin-top:0.5rem;
+      display:none;
+    }
+
+    /* AI QUESTIONS */
+    .ai-card {
+      background:var(--bg); border:1px solid var(--border);
+      border-radius:12px; padding:1rem; margin-bottom:0.8rem;
+    }
+    .ai-q-text { font-size:0.9rem; font-weight:600; margin-bottom:0.5rem; }
+    .ai-hint {
+      font-size:0.8rem; color:var(--text-dim);
+      font-style:italic;
+    }
+    .ai-diff {
+      display:inline-block; font-size:0.7rem; font-weight:700;
+      padding:0.15rem 0.5rem; border-radius:100px; margin-bottom:0.5rem;
+      text-transform:uppercase;
+    }
+    .diff-easy   { background:rgba(0,212,170,0.15); color:var(--green); }
+    .diff-medium { background:rgba(255,214,10,0.15); color:var(--yellow); }
+    .diff-hard   { background:rgba(255,107,107,0.15); color:var(--accent3); }
+
+    .empty-state {
+      text-align:center; padding:2rem;
+      color:var(--text-muted); font-size:0.85rem;
+    }
+
+    .loading { text-align:center; padding:2rem; color:var(--text-dim); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="back-btn">← Back</a>
+  <div class="nav-title" id="nav-topic-title">Loading...</div>
+</nav>
+
+<main>
+  <div id="page-content">
+    <div class="loading">Loading topic...</div>
+  </div>
+</main>
+
+<!-- ADD QUESTION MODAL -->
+<div class="modal-overlay" id="question-modal">
+  <div class="modal">
+    <h3>➕ Add Question</h3>
+    <div class="form-group">
+      <label>Question</label>
+      <textarea id="q-text" placeholder="Write your question here..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Type</label>
+      <select id="q-type">
+        <option value="basic">Basic</option>
+        <option value="advanced">Advanced</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Your C++ Code (paste from VS Code)</label>
+      <textarea id="q-code" placeholder="#include &lt;iostream&gt;&#10;using namespace std;&#10;&#10;int main() {&#10;    // your code&#10;}" style="font-family:'JetBrains Mono',monospace; font-size:0.8rem;"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Output</label>
+      <textarea id="q-output" placeholder="Paste your program output here..." style="min-height:80px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="q-solved" style="width:auto; margin-right:0.5rem;">
+        Mark as Solved
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+      <button class="add-btn" onclick="saveQuestion()">Save Question</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Get topic ID from URL
+// CONCEPT: window.location.pathname gives "/topic/abc123"
+// .split('/') splits by "/" → ["", "topic", "abc123"]
+// .pop() gets the last element → "abc123"
+const TOPIC_ID = window.location.pathname.split('/').pop()
+
+let currentTopic = null
+
+// =============================================
+// LOAD TOPIC DATA
+// =============================================
+async function loadTopic() {
+  try {
+    const res  = await fetch(`/api/topics/${TOPIC_ID}`)
+    const json = await res.json()
+    if (!json.success) return
+
+    currentTopic = json.data
+    renderTopicPage(currentTopic)
+    loadQuestions()
+    loadAIQuestions()
+
+  } catch(e) {
+    console.error(e)
+  }
+}
+
+// =============================================
+// RENDER THE FULL PAGE
+// =============================================
+function renderTopicPage(topic) {
+  document.title = `${topic.title} — DSA Tracker`
+  document.getElementById('nav-topic-title').textContent = `Video #${topic.video_number}`
+
+  const daysTaken = topic.days_taken ? `${topic.days_taken} days taken` : 'In progress'
+  const activeNot  = topic.status === 'not_started' ? 'active-not'  : ''
+  const activeProg = topic.status === 'in_progress'  ? 'active-prog' : ''
+  const activeDone = topic.status === 'completed'     ? 'active-done' : ''
+
+  const ytEmbed = topic.youtube_url
+    ? getEmbedUrl(topic.youtube_url)
+    : null
+
+  document.getElementById('page-content').innerHTML = `
+
+    <!-- TOPIC HEADER -->
+    <div class="topic-header">
+      <div class="topic-meta-row">
+        <span class="video-badge">Video #${String(topic.video_number).padStart(3,'0')}</span>
+        <span class="section-badge">${topic.section_name}</span>
+      </div>
+      <div class="topic-title-big">${topic.title}</div>
+      <div class="status-controls">
+        <button class="status-btn ${activeNot}"
+          onclick="updateStatus('not_started')">⬜ Not Started</button>
+        <button class="status-btn ${activeProg}"
+          onclick="updateStatus('in_progress')">🟡 In Progress</button>
+        <button class="status-btn ${activeDone}"
+          onclick="updateStatus('completed')">✅ Completed</button>
+        <div class="days-taken" id="days-display">
+          ${topic.date_started ? `Started: ${topic.date_started}` : 'Not started yet'}
+          ${topic.days_taken   ? ` · ${topic.days_taken} days` : ''}
+        </div>
+      </div>
+    </div>
+
+    <!-- YOUTUBE + NOTES -->
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">📺 YouTube Video</div>
+        </div>
+        <div class="yt-row">
+          <input class="yt-input" id="yt-input" placeholder="Paste YouTube URL..."
+            value="${topic.youtube_url || ''}"/>
+          <button class="yt-btn" onclick="saveYoutube()">Save</button>
+        </div>
+        ${ytEmbed
+          ? `<iframe class="yt-frame" id="yt-frame"
+              src="${ytEmbed}" style="display:block"
+              allowfullscreen></iframe>`
+          : `<iframe class="yt-frame" id="yt-frame"></iframe>`
+        }
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">📝 My Notes</div>
+        </div>
+        <textarea class="notes-textarea" id="notes-area"
+          placeholder="Write your notes, key concepts, tricks to remember..."
+        >${topic.notes || ''}</textarea>
+        <button class="save-notes-btn" onclick="saveNotes()">Save Notes</button>
+      </div>
+    </div>
+
+    <!-- QUESTIONS: BASIC + ADVANCED -->
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">💡 Basic Questions</div>
+          <button class="add-btn" onclick="openModal('basic')">+ Add</button>
+        </div>
+        <div id="basic-questions-list">
+          <div class="empty-state">No basic questions yet</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">🔥 Advanced Questions</div>
+          <button class="add-btn secondary" onclick="openModal('advanced')">+ Add</button>
+        </div>
+        <div id="advanced-questions-list">
+          <div class="empty-state">No advanced questions yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI QUESTIONS -->
+    <div class="panel" style="margin-bottom:2rem;">
+      <div class="panel-header">
+        <div class="panel-title">🤖 AI Interview Questions</div>
+        <button class="add-btn secondary" onclick="generateAI()">Generate</button>
+      </div>
+      <div id="ai-questions-list">
+        <div class="empty-state">Click Generate to get AI interview questions for this topic</div>
+      </div>
+    </div>
+  `
+}
+
+// =============================================
+// STATUS UPDATE
+// =============================================
+async function updateStatus(status) {
+  await fetch(`/api/topics/${TOPIC_ID}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status })
+  })
+  loadTopic() // Reload page to reflect changes
+}
+
+// =============================================
+// YOUTUBE
+// =============================================
+function getEmbedUrl(url) {
+  const match = url.match(/[?&]v=([^&]+)/) || url.match(/youtu\.be\/([^?]+)/)
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null
+}
+
+async function saveYoutube() {
+  const url = document.getElementById('yt-input').value
+  await fetch(`/api/topics/${TOPIC_ID}/youtube`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ youtube_url: url })
+  })
+  const embed = getEmbedUrl(url)
+  const frame = document.getElementById('yt-frame')
+  if (embed && frame) { frame.src = embed; frame.style.display = 'block'; }
+  alert('YouTube URL saved!')
+}
+
+// =============================================
+// NOTES
+// =============================================
+async function saveNotes() {
+  const notes = document.getElementById('notes-area').value
+  await fetch(`/api/topics/${TOPIC_ID}/notes`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ notes })
+  })
+  alert('Notes saved!')
+}
+
+// =============================================
+// QUESTIONS
+// =============================================
+async function loadQuestions() {
+  const res  = await fetch(`/api/topics/${TOPIC_ID}/questions`)
+  const json = await res.json()
+  if (!json.success) return
+
+  const basic    = json.data.filter(q => q.question_type === 'basic')
+  const advanced = json.data.filter(q => q.question_type === 'advanced')
+
+  renderQuestions('basic-questions-list',    basic,    'basic')
+  renderQuestions('advanced-questions-list', advanced, 'advanced')
+}
+
+function renderQuestions(containerId, questions, type) {
+  const container = document.getElementById(containerId)
+  if (!container) return
+
+  if (questions.length === 0) {
+    container.innerHTML = `<div class="empty-state">No ${type} questions yet</div>`
+    return
+  }
+
+  container.innerHTML = questions.map(q => `
+    <div class="question-item ${type}" id="q-${q.id}">
+      <div class="q-top">
+        <div class="q-text">${q.question_text}</div>
+        <div class="q-actions">
+          <button class="q-btn ${q.is_solved ? 'solved' : ''}"
+            onclick="toggleSolved('${q.id}', ${q.is_solved})">
+            ${q.is_solved ? '✅' : '○'} Solved
+          </button>
+          <button class="q-btn delete" onclick="deleteQuestion('${q.id}')">🗑</button>
+        </div>
+      </div>
+      ${q.your_code ? `<div class="code-block">${escapeHtml(q.your_code)}</div>` : ''}
+      ${q.your_output ? `<div style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-dim)">Output: ${escapeHtml(q.your_output)}</div>` : ''}
+    </div>
+  `).join('')
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+}
+
+// =============================================
+// MODAL
+// =============================================
+let currentModalType = 'basic'
+
+function openModal(type) {
+  currentModalType = type
+  document.getElementById('q-type').value = type
+  document.getElementById('question-modal').classList.add('open')
+}
+
+function closeModal() {
+  document.getElementById('question-modal').classList.remove('open')
+  document.getElementById('q-text').value   = ''
+  document.getElementById('q-code').value   = ''
+  document.getElementById('q-output').value = ''
+  document.getElementById('q-solved').checked = false
+}
+
+async function saveQuestion() {
+  const text = document.getElementById('q-text').value.trim()
+  if (!text) { alert('Please write a question first!'); return; }
+
+  await fetch('/api/questions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      topic_id:      TOPIC_ID,
+      question_text: text,
+      question_type: document.getElementById('q-type').value,
+      your_code:     document.getElementById('q-code').value,
+      your_output:   document.getElementById('q-output').value,
+      is_solved:     document.getElementById('q-solved').checked
+    })
+  })
+  closeModal()
+  loadQuestions()
+}
+
+async function toggleSolved(id, current) {
+  await fetch(`/api/questions/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ is_solved: !current })
+  })
+  loadQuestions()
+}
+
+async function deleteQuestion(id) {
+  if (!confirm('Delete this question?')) return
+  await fetch(`/api/questions/${id}`, { method: 'DELETE' })
+  loadQuestions()
+}
+
+// =============================================
+// AI QUESTIONS
+// =============================================
+async function loadAIQuestions() {
+  const res  = await fetch(`/api/ai/questions/${TOPIC_ID}`)
+  const json = await res.json()
+  if (!json.success || json.data.length === 0) return
+  renderAIQuestions(json.data)
+}
+
+async function generateAI() {
+  const btn = event.target
+  btn.textContent = 'Generating...'
+  btn.disabled    = true
+
+  const res  = await fetch(`/api/ai/generate/${TOPIC_ID}`, { method: 'POST' })
+  const json = await res.json()
+
+  btn.textContent = 'Generate'
+  btn.disabled    = false
+
+  if (json.success) renderAIQuestions(json.data)
+  else alert('AI generation failed. Check your Groq API key.')
+}
+
+function renderAIQuestions(questions) {
+  const container = document.getElementById('ai-questions-list')
+  if (!container) return
+  container.innerHTML = questions.map(q => `
+    <div class="ai-card">
+      <span class="ai-diff diff-${q.difficulty}">${q.difficulty}</span>
+      <div class="ai-q-text">${q.question}</div>
+      <div class="ai-hint">💡 Hint: ${q.hint}</div>
+    </div>
+  `).join('')
+}
+
+// Start
+loadTopic()
+</script>
+</body>
+</html>
